@@ -44,7 +44,7 @@ enroot create --name "${CONTAINER_NAME}" "${SQSH_FILE}"
 # ---------------------------------------------------------------------------
 echo "[3/3] Provisioning container (Python 3.11 + HuggingFace + uv)"
 
-enroot start --rw --env NVIDIA_VISIBLE_DEVICES=void "${CONTAINER_NAME}" bash -c '
+enroot start --root --rw --env NVIDIA_VISIBLE_DEVICES=void "${CONTAINER_NAME}" bash -c '
 set -euo pipefail
 
 # --- System packages -------------------------------------------------------
