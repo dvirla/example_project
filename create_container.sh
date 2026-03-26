@@ -7,18 +7,25 @@ set -euo pipefail
 BASE_IMAGE="nvidia/cuda:12.4.1-devel-ubuntu22.04"
 CONTAINER_NAME="${1:-python311-hf}"
 
-# On DGX, /home quota is too small for large CUDA images (~7 GB uncompressed).
-# Point ENROOT_DATA_PATH to a scratch filesystem with sufficient space.
-# Override by setting the env var before calling this script, e.g.:
-#   ENROOT_DATA_PATH=/scratch/$USER ./create_container.sh
+# SQSH_PATH: where the .sqsh image is stored.
+# MUST be on a shared filesystem visible to all compute nodes (NFS/Lustre/GPFS).
+# Common locations on DGX clusters: /lustre/$USER, /nfs/$USER, /home/$USER.
+# Override: SQSH_PATH=/lustre/$USER ./create_container.sh
+SQSH_PATH="${SQSH_PATH:-/home/${USER}}"
+mkdir -p "${SQSH_PATH}"
+SQSH_FILE="${SQSH_PATH}/${CONTAINER_NAME}.sqsh"
+
+# ENROOT_DATA_PATH: where enroot extracts the container during provisioning.
+# Needs ~7 GB of free space; can be node-local scratch.
+# Override: ENROOT_DATA_PATH=/scratch/$USER ./create_container.sh
 ENROOT_DATA_PATH="${ENROOT_DATA_PATH:-/scratch/${USER}}"
 export ENROOT_DATA_PATH
 mkdir -p "${ENROOT_DATA_PATH}"
 
-echo "[info] ENROOT_DATA_PATH=${ENROOT_DATA_PATH}"
-echo "[info] Available space: $(df -h "${ENROOT_DATA_PATH}" | awk 'NR==2{print $4}') free"
-
-SQSH_FILE="${ENROOT_DATA_PATH}/${CONTAINER_NAME}.sqsh"
+echo "[info] SQSH_FILE=${SQSH_FILE}  (shared, used by srun/pyxis)"
+echo "[info] ENROOT_DATA_PATH=${ENROOT_DATA_PATH}  (local, used during provisioning)"
+echo "[info] Shared path free space:  $(df -h "${SQSH_PATH}"       | awk 'NR==2{print $4}')"
+echo "[info] Scratch path free space: $(df -h "${ENROOT_DATA_PATH}" | awk 'NR==2{print $4}')"
 
 # ---------------------------------------------------------------------------
 # Step 1: Import base Docker image → squashfs
@@ -116,7 +123,13 @@ rm -rf /var/lib/apt/lists/*
 echo ""
 echo "Container '${CONTAINER_NAME}' is ready."
 echo ""
-echo "  Start an interactive shell:  enroot start --rw --env NVIDIA_VISIBLE_DEVICES=all ${CONTAINER_NAME} bash"
-echo "  Run a script:                enroot start --rw --env NVIDIA_VISIBLE_DEVICES=all ${CONTAINER_NAME} python3 your_script.py"
+echo "  Via srun / pyxis (recommended on DGX):"
+echo "    srun --pty --container-image=${SQSH_FILE} \\"
+echo "         --container-mounts=/home/\${USER}/example_project:/workspace \\"
+echo "         bash -i"
 echo ""
-echo "  To mount a host directory add:  --mount /host/path:/container/path"
+echo "  Via enroot directly (login node only):"
+echo "    enroot start --root --rw --env NVIDIA_VISIBLE_DEVICES=all ${CONTAINER_NAME} bash"
+echo ""
+echo "  NOTE: The .sqsh file at ${SQSH_FILE} must be on a shared filesystem"
+echo "        (NFS/Lustre) accessible from all compute nodes."
