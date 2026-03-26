@@ -44,7 +44,7 @@ enroot create --name "${CONTAINER_NAME}" "${SQSH_FILE}"
 # ---------------------------------------------------------------------------
 echo "[3/3] Provisioning container (Python 3.11 + HuggingFace + uv)"
 
-enroot start --rw "${CONTAINER_NAME}" bash -c '
+enroot start --rw --env NVIDIA_VISIBLE_DEVICES=void "${CONTAINER_NAME}" bash -c '
 set -euo pipefail
 
 # --- System packages -------------------------------------------------------
@@ -116,7 +116,7 @@ rm -rf /var/lib/apt/lists/*
 echo ""
 echo "Container '${CONTAINER_NAME}' is ready."
 echo ""
-echo "  Start an interactive shell:  enroot start --rw ${CONTAINER_NAME} bash"
-echo "  Run a script:                enroot start --rw ${CONTAINER_NAME} python3 your_script.py"
+echo "  Start an interactive shell:  enroot start --rw --env NVIDIA_VISIBLE_DEVICES=all ${CONTAINER_NAME} bash"
+echo "  Run a script:                enroot start --rw --env NVIDIA_VISIBLE_DEVICES=all ${CONTAINER_NAME} python3 your_script.py"
 echo ""
 echo "  To mount a host directory add:  --mount /host/path:/container/path"
