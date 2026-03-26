@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "sentencepiece>=0.2.1",
-    "torch>=2.11.0",
+    "torch>=2.4.0",
     "transformers>=5.3.0",
 ]
 
@@ -14,3 +14,11 @@ dependencies = [
 dev = [
     "ruff>=0.15.7",
 ]
+
+[[tool.uv.index]]
+name = "pytorch-cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu124" }
