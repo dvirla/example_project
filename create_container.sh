@@ -6,7 +6,19 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 BASE_IMAGE="nvidia/cuda:12.4.1-devel-ubuntu22.04"
 CONTAINER_NAME="${1:-python311-hf}"
-SQSH_FILE="$(pwd)/${CONTAINER_NAME}.sqsh"
+
+# On DGX, /home quota is too small for large CUDA images (~7 GB uncompressed).
+# Point ENROOT_DATA_PATH to a scratch filesystem with sufficient space.
+# Override by setting the env var before calling this script, e.g.:
+#   ENROOT_DATA_PATH=/scratch/$USER ./create_container.sh
+ENROOT_DATA_PATH="${ENROOT_DATA_PATH:-/scratch/${USER}}"
+export ENROOT_DATA_PATH
+mkdir -p "${ENROOT_DATA_PATH}"
+
+echo "[info] ENROOT_DATA_PATH=${ENROOT_DATA_PATH}"
+echo "[info] Available space: $(df -h "${ENROOT_DATA_PATH}" | awk 'NR==2{print $4}') free"
+
+SQSH_FILE="${ENROOT_DATA_PATH}/${CONTAINER_NAME}.sqsh"
 
 # ---------------------------------------------------------------------------
 # Step 1: Import base Docker image → squashfs
