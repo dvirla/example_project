@@ -1,0 +1,9 @@
+[pip]
+no-cache = false
+
+# In containerized environments (e.g. srun/pyxis on DGX), the container
+# overlay has limited writable space. Override cache-dir via env var:
+#   UV_CACHE_DIR=/workspace/.uv-cache uv sync
+#
+# Or set it permanently for the workspace by uncommenting:
+# cache-dir = "/workspace/.uv-cache"
