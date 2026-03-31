@@ -5,7 +5,7 @@ import chromadb
 from chromadb import EmbeddingFunction, Documents, Embeddings
 from datasets import load_dataset
 
-from embed import EmbeddingService
+from .embed import EmbeddingService
 
 
 CHROMA_PATH = "./chroma_db"

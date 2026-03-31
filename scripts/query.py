@@ -3,7 +3,7 @@
 import argparse
 import sys
 
-from chroma_service import ChromaService
+from src import ChromaService
 
 
 def query(user_query: str, top_k: int = 5) -> list[dict]:
