@@ -1,8 +1,13 @@
+import os
+
 import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModel
 
 MODEL_NAME = "intfloat/multilingual-e5-base"
+# Redirect model cache away from ~/.cache to avoid quota issues on shared machines.
+# Override with HF_HOME env var if needed.
+MODEL_CACHE_DIR = os.environ.get("HF_HOME", "./data/hf_home")
 
 
 def average_pool(last_hidden_state: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
@@ -30,8 +35,8 @@ class EmbeddingService:
     def __init__(self, model_name: str = MODEL_NAME, device: str | None = None):
         self.model_name = model_name
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModel.from_pretrained(model_name).to(self.device)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir=MODEL_CACHE_DIR)
+        self.model = AutoModel.from_pretrained(model_name, cache_dir=MODEL_CACHE_DIR).to(self.device)
         self.model.eval()
 
     def embed_passages(self, texts: list[str]) -> list[list[float]]:

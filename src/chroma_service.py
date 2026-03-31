@@ -1,3 +1,4 @@
+import os
 import re
 
 import chromadb
@@ -16,6 +17,9 @@ DATASET_CONFIG = "wikitext-2-raw-v1"
 DATASET_SPLIT = "test"
 MAX_CHUNKS = 200
 SENTENCES_PER_CHUNK = 3
+# Redirect dataset cache away from ~/.cache to avoid quota issues on shared machines.
+# Override with HF_DATASETS_CACHE env var if needed.
+DATASET_CACHE_DIR = os.environ.get("HF_DATASETS_CACHE", "./data/hf_datasets")
 
 
 # --- Grammar-based chunking ---
@@ -85,7 +89,7 @@ class ChromaService:
 # --- Population ---
 
 def populate(service: ChromaService, max_chunks: int = MAX_CHUNKS):
-    dataset = load_dataset(DATASET_NAME, DATASET_CONFIG, split=DATASET_SPLIT)
+    dataset = load_dataset(DATASET_NAME, DATASET_CONFIG, split=DATASET_SPLIT, cache_dir=DATASET_CACHE_DIR)
 
     chunks: list[str] = []
     for row in dataset:
