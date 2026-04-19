@@ -108,6 +108,7 @@ def main():
 
         print(f"Loading tokenizer and model: {MODEL_ID}")
         tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
+        tokenizer.model_max_length = HPARAMS["max_seq_length"]
 
         model = AutoModelForCausalLM.from_pretrained(
             MODEL_ID,
@@ -138,7 +139,6 @@ def main():
             bf16=True,
             logging_steps=10,
             save_strategy="epoch",
-            max_seq_length=HPARAMS["max_seq_length"],
             report_to="none",
         )
 
