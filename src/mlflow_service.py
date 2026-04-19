@@ -5,9 +5,10 @@ from typing import Any
 
 import mlflow
 
+_DEFAULT_DB = os.path.join(os.path.dirname(__file__), "../data/mlflow.db")
 MLFLOW_TRACKING_URI = os.environ.get(
     "MLFLOW_TRACKING_URI",
-    os.path.join(os.path.dirname(__file__), "../data/mlruns"),
+    f"sqlite:///{os.path.abspath(_DEFAULT_DB)}",
 )
 
 
