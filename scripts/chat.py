@@ -1,6 +1,8 @@
 """Interactive CLI for the LLM agent with tool routing."""
 
 import argparse
+from dotenv import load_dotenv
+load_dotenv()
 
 from src import AgentService
 from src.tools import ask_finetuned_model, retrieve_docs
