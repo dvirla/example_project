@@ -14,7 +14,7 @@ from pydantic_ai.providers.ollama import OllamaProvider
 OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
 LOGFIRE_SEND = os.environ.get("LOGFIRE_SEND", "true").lower() == "true"
 
-logfire.configure(send_to_logfire=LOGFIRE_SEND)
+logfire.configure(send_to_logfire=True, token=LOGFIRE_SEND)
 logfire.instrument_pydantic_ai()
 
 Provider = Literal["google", "ollama"]
@@ -30,7 +30,7 @@ class AgentService:
     ):
         if provider == "google":
             model = GoogleModel(
-                model_name or "gemini-3.1-flash-lite",
+                model_name or "gemini-3-flash-preview",
                 provider=GoogleProvider(),
             )
         elif provider == "ollama":
